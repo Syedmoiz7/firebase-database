@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './index.css'
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, doc, onSnapshot } from "firebase/firestore";
 
 // TODO: Replace the following with your app's Firebase project configuration
 // See: https://firebase.google.com/docs/web/learn-more#config-object
@@ -35,18 +35,25 @@ function DataBase() {
 
         const getData = async () => {
             const querySnapshot = await getDocs(collection(db, "posts"));
+
             querySnapshot.forEach((doc) => {
                 console.log(`${doc.id} => `, doc.data());
 
-                setPostText((prev) => {
+                setPosts((prev) => {
                     let newArray = [...prev, doc.data()]
                     return newArray
                 })
                 
             });
         }
-        getData();
+        // getData();
 
+        const getRealTimeData = async () => {
+            const unsub = onSnapshot(doc(db, "posts"), (doc) => {
+                console.log("Current data: ", doc.data());
+            });
+        }
+        getRealTimeData();
     }, [])
 
     const savePost = async (e) => {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './index.css'
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, doc, onSnapshot } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs, doc, onSnapshot, query } from "firebase/firestore";
 
 // TODO: Replace the following with your app's Firebase project configuration
 // See: https://firebase.google.com/docs/web/learn-more#config-object
@@ -43,17 +43,34 @@ function DataBase() {
                     let newArray = [...prev, doc.data()]
                     return newArray
                 })
-                
+
             });
         }
         // getData();
 
+        let unsubscribe = null;
         const getRealTimeData = async () => {
-            const unsub = onSnapshot(doc(db, "posts"), (doc) => {
-                console.log("Current data: ", doc.data());
+
+            const q = query(collection(db, "posts"));
+            unsubscribe = onSnapshot(q, (querySnapshot) => {
+                const posts = [];
+                querySnapshot.forEach((doc) => {
+                    posts.push(doc.data());
+                });
+
+                setPosts(posts)
+
+                console.log("posts: ", posts);
             });
         }
         getRealTimeData();
+
+
+        return ()=>{
+            console.log("clean up");
+            unsubscribe();
+        }
+
     }, [])
 
     const savePost = async (e) => {

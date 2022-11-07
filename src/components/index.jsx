@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
 import './index.css'
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, doc, onSnapshot, query } from "firebase/firestore";
+import {
+    getFirestore, collection,
+    addDoc, getDocs, doc,
+    onSnapshot, query, serverTimestamp, orderBy
+} from "firebase/firestore";
+import moment from 'moment/moment';
 
 // TODO: Replace the following with your app's Firebase project configuration
 // See: https://firebase.google.com/docs/web/learn-more#config-object
@@ -51,7 +56,8 @@ function DataBase() {
         let unsubscribe = null;
         const getRealTimeData = async () => {
 
-            const q = query(collection(db, "posts"));
+            const q = query(collection(db, "posts"), orderBy("createdOn", "desc"));
+
             unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const posts = [];
                 querySnapshot.forEach((doc) => {
@@ -66,7 +72,7 @@ function DataBase() {
         getRealTimeData();
 
 
-        return ()=>{
+        return () => {
             console.log("clean up");
             unsubscribe();
         }
@@ -81,7 +87,8 @@ function DataBase() {
         try {
             const docRef = await addDoc(collection(db, "posts"), {
                 text: postText,
-                createdOn: new Date().getTime(),
+                // createdOn: new Date().getTime()
+                createdOn: serverTimestamp()
             });
             console.log("Document written with ID: ", docRef.id);
 
@@ -114,6 +121,13 @@ function DataBase() {
                 {posts.map((eachPost, i) => (
                     <div className='post' key={i}>
                         <h3>{eachPost?.text}</h3>
+                        <p>{moment(
+                            (eachPost?.createdOn?.seconds) ?
+                                eachPost?.createdOn?.seconds * 1000
+                                :
+                                undefined)
+                            .format('Do MMM, h:mm a')}
+                        </p>
                     </div>
 
 

@@ -34,6 +34,8 @@ function DataBase() {
     const [postText, setPostText] = useState("");
     const [posts, setPosts] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+    const [isEditing, setIsEditing] = useState(null)
+
 
 
     useEffect(() => {
@@ -116,6 +118,24 @@ function DataBase() {
 
     }
 
+    const edit = (postId) => {
+
+        setIsEditing(postId)
+
+        // const updatedState =
+        //     posts.map(eachItem => {
+        //         if (eachItem.id === postId) {
+        //             return { ...eachItem, isEditing: !eachItem.isEditing }
+        //         } else {
+        //             return eachItem
+        //         }
+
+        //     })
+
+        // setPosts(updatedState)
+
+    }
+
 
     return (
         <div className='main'>
@@ -137,7 +157,12 @@ function DataBase() {
 
                 {posts.map((eachPost, i) => (
                     <div className='post' key={i}>
-                        <h3>{eachPost?.text}</h3>
+                        <h3>{(eachPost.id === isEditing) ?
+                            <form>
+                            <input type="text" /> 
+                            </form>
+                            : eachPost?.text}
+                            </h3>
                         <p>{moment(
                             (eachPost?.createdOn?.seconds) ?
                                 eachPost?.createdOn?.seconds * 1000
@@ -150,9 +175,7 @@ function DataBase() {
                             Delete
                         </button>
 
-                        <button onClick={() => {
-                            setPosts()
-                        }}>
+                        <button onClick={() => { edit(eachPost?.id) }}>
                             Edit
                         </button>
 

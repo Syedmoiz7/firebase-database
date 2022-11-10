@@ -3,7 +3,7 @@ import './index.css'
 import { initializeApp } from "firebase/app";
 import {
     getFirestore, collection,
-    addDoc, getDocs, doc,
+    addDoc, getDocs, doc, deleteDoc, updateDoc,
     onSnapshot, query, serverTimestamp, orderBy
 } from "firebase/firestore";
 import moment from 'moment/moment';
@@ -61,7 +61,13 @@ function DataBase() {
             unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const posts = [];
                 querySnapshot.forEach((doc) => {
-                    posts.push(doc.data());
+                    // posts.push(doc.data());
+
+                    let data = doc.data();
+                    data.id = doc.id;
+
+                    posts.push(data);
+
                 });
 
                 setPosts(posts)
@@ -98,6 +104,17 @@ function DataBase() {
 
     }
 
+    const deletePost = async (postId) => {
+        await deleteDoc(doc(db, "posts", postId));
+    }
+
+    const updatePost = async (postId, updatedText) => {
+
+        await updateDoc(doc(db, "posts", postId), {
+            text: updatedText
+        });
+
+    }
 
 
     return (
@@ -128,6 +145,18 @@ function DataBase() {
                                 undefined)
                             .format('Do MMM, h:mm a')}
                         </p>
+
+                        <button onClick={() => { deletePost(eachPost?.id) }}>
+                            Delete
+                        </button>
+
+                        <button onClick={() => {
+                            setPosts()
+                        }}>
+                            Edit
+                        </button>
+
+
                     </div>
 
 

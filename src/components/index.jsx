@@ -34,7 +34,14 @@ function DataBase() {
     const [postText, setPostText] = useState("");
     const [posts, setPosts] = useState([])
     const [isLoading, setIsLoading] = useState(false)
+
     const [isEditing, setIsEditing] = useState(null)
+    const [editingText, setEditingText] = useState("")
+
+    const [editing, setEditing] = useState({
+        editingId: null,
+        editingText: ""
+    })
 
 
 
@@ -110,17 +117,24 @@ function DataBase() {
         await deleteDoc(doc(db, "posts", postId));
     }
 
-    const updatePost = async (postId, updatedText) => {
+    const updatePost = async (e) => {
+        e.preventDefault()
 
-        await updateDoc(doc(db, "posts", postId), {
-            text: updatedText
+        await updateDoc(doc(db, "posts", editing.editingId), {
+            text: editing.editingText
         });
 
+        setEditing({
+            editingId: null,
+            editingText: ""
+
+        })
     }
 
-    const edit = (postId) => {
+    const edit = (postId, text) => {
 
-        setIsEditing(postId)
+       
+
 
         // const updatedState =
         //     posts.map(eachItem => {
@@ -145,7 +159,7 @@ function DataBase() {
                     type="text"
                     placeholder='Whats in your mind...'
                     onChange={(e) => {
-                        setPostText(e.target.value)
+                        setEditing(e.target.value)
                     }}
                 ></textarea>
                 <br />
@@ -157,12 +171,21 @@ function DataBase() {
 
                 {posts.map((eachPost, i) => (
                     <div className='post' key={i}>
-                        <h3>{(eachPost.id === isEditing) ?
-                            <form>
-                            <input type="text" /> 
+
+                        <h3>{(eachPost.id === editing.editingId) ?
+                            <form onSubmit={updatePost}>
+                                <input type="text" value={editing.editingText}
+                                    placeholder="Please enter updated value"
+                                    onChange={(e) => {
+                                        setEditing({...editing, editingText: e.target.value})
+                                    }} />
+
+                                    <button type='submit'>Update</button>
                             </form>
-                            : eachPost?.text}
-                            </h3>
+                            :
+                            eachPost?.text}
+                        </h3>
+
                         <p>{moment(
                             (eachPost?.createdOn?.seconds) ?
                                 eachPost?.createdOn?.seconds * 1000
@@ -175,9 +198,18 @@ function DataBase() {
                             Delete
                         </button>
 
-                        <button onClick={() => { edit(eachPost?.id) }}>
+                        {(editing.editingId === eachPost?.id) ?
+                        ""  
+                        :
+                        <button onClick={() => { 
+
+                            setEditing({
+                                editingId: eachPost?.id,
+                                editingText: eachPost?.text
+                            })}}>
+
                             Edit
-                        </button>
+                        </button>}
 
 
                     </div>

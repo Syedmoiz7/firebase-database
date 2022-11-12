@@ -211,7 +211,7 @@ function DataBase() {
                             Edit
                         </button>}
 
-                            for github login in laptop
+                            for github login in laptop 2nd
 
                     </div>
 
